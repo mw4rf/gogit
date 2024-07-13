@@ -44,3 +44,12 @@ gogit --debug           => Prints debug information.
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+## Todo
+
+- [] Clone absent repos.
+- [] Fetch/Pull/Push all repos.
+- [] Fetch/Pull/Push a single repo (by name).
+- [] Show repos behind/ahead of remote, or with changes to be committed.
+- [] Write --help output.
+- [] Make a log-compliant output to run gogit as a cronjob.
