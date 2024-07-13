@@ -40,7 +40,12 @@ type Root struct {
 // Loads the repositories from the config.toml file and returns a list of Repo structs
 func LoadRepos() []Repo {
 	// Open the config.toml file
-	file, err := os.Open("config.toml")
+	configDir, err := getDefaultDirectory()
+	if err != nil {
+		log.Fatalf("Error getting default directory: %v", err)
+	}
+	configFilePath := filepath.Join(configDir, "config.toml")
+	file, err := os.Open(configFilePath)
 	if err != nil {
 		log.Fatalf("Error opening config.toml file: %v", err)
 	}
@@ -144,6 +149,26 @@ func logDebug(message string) {
 	if debugMode {
 		fmt.Println("DEBUG:", message)
 	}
+}
+
+
+// Returns the default directory for the application,
+// according to the operating system
+// e.g. /home/user/.config/gogit
+func getDefaultDirectory() (string, error) {
+	dir, err := os.UserConfigDir()
+	if err != nil {
+		return "", err
+	}
+	dir = filepath.Join(dir, "gogit")
+
+	// Create the directory if it doesn't exist
+	err = os.MkdirAll(dir, os.ModePerm)
+	if err != nil {
+		return "", err
+	}
+
+	return dir, nil
 }
 
 func main() {
