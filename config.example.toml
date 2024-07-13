@@ -1,13 +1,23 @@
 [github]
-path = "local/path/to/root1"
-
+local = "local/path/to/root1"
 [github.repo1]
-name = "Repo1"
-path = "remote/path/to/root1"
+remote = "remote/path/to/repo1"
 
 [bitbucket]
-path = "local/path/to/root2"
+local = "local/path/to/root2"
+[bitbucket.repo1]
+remote = "remote/path/to/repo1"
 
-[bitbucket.repo3]
-name = "Repo3"
-path = "remote/path/to/root2/repo3"
+[work]
+local = "/home/johndoe/work/"
+[work.projectbackend]
+remote = "git@mycompany.com:johndoe/projectbackend"
+[work.projectfrontend]
+remote = "git@mycompany.com:johndoe/projectfrontend"
+
+[personal]
+local = "/home/johndoe/git/"
+[personal.myorgmodenotes]
+remote = "git@github.com:johndoe/myorgmodenotes"
+[personal.mysideproject]
+remote = "git@github.com:johndoe/mysideproject"
