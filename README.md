@@ -5,8 +5,6 @@ gogit is a CLI tool, written in Go lang, to batch manage multiple git repositori
 - [Configuration](#configuration)
 - [Usage](#usage)
 
-## Installation
-
 ## Configuration
 
 All the configuration is done in a `config.toml` file.
@@ -16,6 +14,8 @@ The location of this file depends on your OS:
 - Linux: `~/.config/gogit/config.toml`
 - macOS: `~/Library/Application Support/gogit/config.toml`
 - Windows: `%APPDATA%\gogit\config.toml`
+
+The configuration files uses the very simple [TOML](https://toml.io/en/) syntax to declare your local root directory and all the repositories to manage.
 
 ```toml
 [github]
