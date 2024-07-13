@@ -35,6 +35,12 @@ An example configuration file is provided: [config.example.toml](config.example.
 
 ## Usage
 
+``` sh
+gogit                   => Prints a list of managed repositories.
+gogit --help            => Prints help.
+gogit --debug           => Prints debug information.
+```
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
