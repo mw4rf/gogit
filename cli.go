@@ -36,3 +36,18 @@ func (r Repo) ToString() string {
 		repoInfo,
 	)
 }
+
+// Print a list of repos and their details
+func PrintRepos(repos []Repo) {
+	for _, repo := range repos {
+		fmt.Println(repo.ToString())
+
+		LogDebug(fmt.Sprintf("Repo: %s", repo.Name))
+		LogDebug(fmt.Sprintf("Remote: %s", repo.Remote))
+		LogDebug(fmt.Sprintf("Local: %s", repo.Root.Local))
+		LogDebug(fmt.Sprintf("Remote Name: %s", repo.Config.RemoteName))
+		LogDebug(fmt.Sprintf("Remote URL: %s", repo.Config.RemoteURL))
+		LogDebug(fmt.Sprintf("Branch Name: %s", repo.Config.BranchName))
+		LogDebug(fmt.Sprintf("Branch Remote: %s", repo.Config.BranchRemote))
+	}
+}
