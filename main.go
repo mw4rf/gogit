@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"encoding/json"
+	"io"
 )
 
 // Struct Repo describes a git repository
@@ -147,16 +149,133 @@ func (r *Repo) GetConfigValue(key string) (string, error) {
 	return "", fmt.Errorf("Invalid key format")
 }
 
+// Scan a root folder for repositories and return a Repos slice
+func MakeReposFromRoot(root string) ([]Repo, error) {
+	var repos []Repo
 
-func main() {
-	repo, err := MakeRepo(".")
+	err := filepath.Walk(root, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() {
+			// Check if the directory is a git repository
+			if _, err := os.Stat(filepath.Join(path, ".git")); err == nil {
+				// Create a Repo from the directory
+				repo, err := MakeRepo(path)
+				if err != nil {
+					fmt.Printf("Error creating repo from %s: %s\n", path, err)
+					return nil // Continue walking
+				}
+				repos = append(repos, *repo)
+				// Skip walking into the .git directory itself
+				return filepath.SkipDir
+			}
+		}
+
+		return nil
+	})
+
 	if err != nil {
-		fmt.Println(err)
-		return
+		return nil, fmt.Errorf("Error walking the path %s: %s", root, err)
 	}
 
+	return repos, nil
+}
+
+// Print the details of a Repo
+func PrintRepo(repo *Repo) {
 	fmt.Printf("Repository: %s\n", repo.Name)
 	fmt.Printf("Local Path: %s\n", repo.Local)
 	fmt.Printf("Remote URL: %s\n", repo.Remote)
 	fmt.Printf("Config: %+v\n", repo.Config)
+}
+
+// Export the Repos slice to a JSON string
+// If includeConfig is false, the Config field is omitted
+func ReposToJSON(repos []Repo, includeConfig bool) (string, error) {
+	if includeConfig {
+		jsonData, err := json.MarshalIndent(repos, "", "  ")
+		if err != nil {
+			return "", fmt.Errorf("Error marshalling repos to JSON: %s", err)
+		}
+		return string(jsonData), nil
+	}
+
+	type RepoWithoutConfig struct {
+		Name   string `json:"name"`
+		Local  string `json:"local"`
+		Remote string `json:"remote,omitempty"`
+	}
+
+	reposWithoutConfig := make([]RepoWithoutConfig, len(repos))
+	for i, repo := range repos {
+		reposWithoutConfig[i] = RepoWithoutConfig{
+			Name:   repo.Name,
+			Local:  repo.Local,
+			Remote: repo.Remote,
+		}
+	}
+
+	jsonData, err := json.MarshalIndent(reposWithoutConfig, "", "  ")
+	if err != nil {
+		return "", fmt.Errorf("Error marshalling repos to JSON: %s", err)
+	}
+
+	return string(jsonData), nil
+}
+
+// Read a JSON string and return a slice of Repos
+func ReposFromJSON(jsonData string) ([]Repo, error) {
+	var repos []Repo
+	err := json.Unmarshal([]byte(jsonData), &repos)
+	if err != nil {
+		return nil, fmt.Errorf("Error unmarshalling JSON to repos: %s", err)
+	}
+	return repos, nil
+}
+
+// Load the configuration file
+// The configuration file is a JSON file that contains an array of repositories
+// Each repository is an object with the following fields:
+// - name: the name of the repository
+// - local: the local path of the repository
+// - remote: the remote URL of the repository
+// The file is located in the OS user's configuration directory, i.e. ~/.config/gogit/repos.json
+func LoadReposFromJSON(file string) ([]Repo, error) {
+	f, err := os.Open(file)
+	if err != nil {
+		return nil, fmt.Errorf("Could not open %s: %s", file, err)
+	}
+	defer f.Close()
+
+	bytes, err := io.ReadAll(f)
+	if err != nil {
+		return nil, fmt.Errorf("Error reading %s: %s", file, err)
+	}
+
+	var repos []Repo
+	err = json.Unmarshal(bytes, &repos)
+	if err != nil {
+		return nil, fmt.Errorf("Error parsing JSON: %s", err)
+	}
+
+	return repos, nil
+}
+
+func main() {
+	// Load the repositories from the configuration file
+	repos, err := LoadReposFromJSON("repos.json")
+	if err != nil {
+		fmt.Println(ColorOutput(ColorRed, fmt.Sprintf("Error loading repositories: %s", err)))
+		fmt.Println("Please make sure the configuration file exists and is valid.")
+		fmt.Println("The configuration file should be a JSON file that contains an array of repositories.")
+		fmt.Println("It should be located in the OS user's configuration directory, i.e. ~/.config/gogit/repos.json")
+		os.Exit(1)
+	}
+
+	// Print the details of each repository
+	for _, repo := range repos {
+		PrintRepo(&repo)
+	}
 }
