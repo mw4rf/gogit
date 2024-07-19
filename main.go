@@ -183,13 +183,6 @@ func MakeReposFromRoot(root string) ([]Repo, error) {
 	return repos, nil
 }
 
-// Print the details of a Repo
-func PrintRepo(repo *Repo) {
-	fmt.Printf("Repository: %s\n", repo.Name)
-	fmt.Printf("Local Path: %s\n", repo.Local)
-	fmt.Printf("Remote URL: %s\n", repo.Remote)
-	fmt.Printf("Config: %+v\n", repo.Config)
-}
 
 // Export the Repos slice to a JSON string
 // If includeConfig is false, the Config field is omitted
@@ -237,12 +230,9 @@ func ReposFromJSON(jsonData string) ([]Repo, error) {
 
 // Load the configuration file
 // The configuration file is a JSON file that contains an array of repositories
-// Each repository is an object with the following fields:
-// - name: the name of the repository
-// - local: the local path of the repository
-// - remote: the remote URL of the repository
 // The file is located in the OS user's configuration directory, i.e. ~/.config/gogit/repos.json
 func LoadReposFromJSON(file string) ([]Repo, error) {
+	// Load the repositories from the configuration file
 	f, err := os.Open(file)
 	if err != nil {
 		return nil, fmt.Errorf("Could not open %s: %s", file, err)
@@ -260,12 +250,52 @@ func LoadReposFromJSON(file string) ([]Repo, error) {
 		return nil, fmt.Errorf("Error parsing JSON: %s", err)
 	}
 
+	// Fill the Config map for each repository
+	for i, repo := range repos {
+		repo, err := MakeRepo(repo.Local)
+		if err != nil {
+			return nil, fmt.Errorf("Error creating repo from %s: %s", repo.Local, err)
+		}
+		repos[i] = *repo
+	}
+
 	return repos, nil
 }
 
+
 func main() {
+	// Action that must be executed before loading the repositories
+
+	// No argument
+	if len(os.Args) < 2 {
+		fmt.Println(ColorOutput(ColorYellow, "gogit - A simple git repository manager"))
+		fmt.Println("Usage: gogit <command> [args]")
+		fmt.Println(fmt.Sprintf("Use '%s' to see the list of available commands.", ColorOutput(ColorGreen, "gogit help")))
+		os.Exit(0)
+	}
+
+	// Command: help
+	if os.Args[1] == "help" {
+		PrintHelp()
+		os.Exit(0)
+	}
+
+	// Command: genrepos
+	// Description: Generate and print a JSON string with the details of all git repositories in a given root folder
+	// Example: gogit genrepos /path/to/root
+	if os.Args[1] == "genrepos" {
+		if len(os.Args) < 3 {
+			fmt.Println(ColorOutput(ColorRed, "Error: Missing root folder argument"))
+			fmt.Println("Usage: gogit genrepos /path/to/root")
+			os.Exit(1)
+		}
+		root := os.Args[2]
+		GenRepos(root)
+	}
+
 	// Load the repositories from the configuration file
-	repos, err := LoadReposFromJSON("repos.json")
+	reposFile := filepath.Join(GetUserConfigDir(), "repos.json")
+	repos, err := LoadReposFromJSON(reposFile)
 	if err != nil {
 		fmt.Println(ColorOutput(ColorRed, fmt.Sprintf("Error loading repositories: %s", err)))
 		fmt.Println("Please make sure the configuration file exists and is valid.")
@@ -274,8 +304,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Print the details of each repository
-	for _, repo := range repos {
-		PrintRepo(&repo)
+	// Handle commands that require the repositories
+	switch os.Args[1] {
+	case "list":
+		simpleOutput := true
+		if len(os.Args) > 2 && os.Args[2] == "full" {
+			simpleOutput = false
+		}
+		PrintReposList(repos, simpleOutput)
+	default:
+		fmt.Println(ColorOutput(ColorRed, fmt.Sprintf("Error: Unknown command '%s'", os.Args[1])))
+		fmt.Println(fmt.Sprintf("Use '%s' to see the list of available commands.", ColorOutput(ColorGreen, "gogit help")))
 	}
+
 }
