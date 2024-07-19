@@ -6,49 +6,30 @@ import (
 	"os"
 )
 
-// Global variable to control debug mode
-var debugMode bool
+// Struct Root describes a root path containing repositories
+type Root struct {
+	Local string
+}
 
+// Struct Repo describes a git repository
+type Repo struct {
+	Name   string
+	Remote string
+	Config Config
+	Root   Root
+}
 
-
-// logDebug prints debug messages if debugMode is enabled
-func LogDebug(message string) {
-	if debugMode {
-		fmt.Println("DEBUG:", message)
-	}
+// Struct Config describes the configuration of a git repository
+type Config struct {
+	RemoteName   string
+	RemoteURL    string
+	BranchName   string
+	BranchRemote string
 }
 
 
+
+
 func main() {
-	// Define and parse command line "--flags"
-	debugFlag := flag.Bool("debug", false, "Enable debug mode")
-	flag.Parse()
-
-	// Set debug mode based on command line flag
-	debugMode = *debugFlag
-
-	LogDebug("Debug mode enabled")
-
-	// Load repositories from config.toml file
-	repos := LoadRepos()
-
-	// Regular arguments after "--flags"
-	command := flag.Arg(0)
-
-	switch command {
-		case "init":
-			fmt.Println("init command")
-		case "status":
-			PrintRepos(repos)
-		default:
-			fmt.Println("gogit v0.1")
-			fmt.Println("Usage: gogit [flags] <commands>")
-			fmt.Println("Flags:")
-			fmt.Println("  --debug Enable debug mode")
-			fmt.Println("Commands:")
-			fmt.Println("  init   Initialize a new repository")
-			fmt.Println("  status Show the status of the repository")
-			os.Exit(1)
-	}
 
 }
