@@ -7,38 +7,52 @@ gogit is a CLI tool, written in Go lang, to batch manage multiple git repositori
 
 ## Configuration
 
-All the configuration is done in a `config.toml` file.
+All the configuration is done in a `repos.json` file.
 
 The location of this file depends on your OS:
 
-- Linux: `~/.config/gogit/config.toml`
-- macOS: `~/Library/Application Support/gogit/config.toml`
-- Windows: `%APPDATA%\gogit\config.toml`
+- Linux: `~/.config/gogit/repos.json`
+- macOS: `~/Library/Application Support/gogit/repos.json`
+- Windows: `%APPDATA%\gogit\repos.json`
 
-The configuration files uses the very simple [TOML](https://toml.io/en/) syntax to declare your local root directory and all the repositories to manage.
+The configuration files uses the very simple JSON syntax to declare the repositories.
 
-```toml
-[github]
-local = "/home/user/git/"
-
-[github.repo1]
-remote = "git@github.com:user/repo1.git"
-
-[github.repo2]
-remote = "git@github.com:user/repo2.git"
+```json
+{
+    "name": "Ventanas",
+    "local": "/home/bill/worlddomination/git/ventanas",
+    "remote": "git@gitpuertas.com:bill/ventanas.git"
+},
+{
+    "name": "AdjectiveAnimal"
+    "local": "/home/bill/worldemancipation/git/adjectiveanimal",
+    "remote": "git@freeforall.org:bill/adjectiveanimal.git"
+}
 ```
 
-- The `local` field specifies the local _absolute_ root path where repositories are located.
-- Each repository under a root is specified by its name and remote URL.
+- The `local` field specifies the local _absolute_ root path where repository is located.
+- The `remote` field specifies the URL to the remote git repository.
 
-An example configuration file is provided: [config.example.toml](config.example.toml).
+If you already have a folder, let's say `~/git`, with a bunch of cloned repos, you can generate the `repos.json` file with the `genrepos` command.
+
+``` sh
+# Print JSON content to screen
+gogit genrepos ~/git
+
+# Generate repos.json
+gogit genrepos ~/git > ~/.config/gogit/repos.json
+```
 
 ## Usage
 
 ``` sh
-gogit                   => Prints a list of managed repositories.
-gogit --help            => Prints help.
-gogit --debug           => Prints debug information.
+Usage: gogit <command> [arguments]
+Commands:
+  list                  List the repositories in a simple and compact format
+  list full             List the repositories in a detailed format
+  genrepos [root]       Generate and print a JSON string with the details of all git repositories in a given root folder
+  clone                 Check all repositories and clone the ones that are missing
+  help                  Print this help message
 ```
 
 ## License
@@ -47,9 +61,9 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Todo
 
-- [] Clone absent repos.
-- [] Fetch/Pull/Push all repos.
-- [] Fetch/Pull/Push a single repo (by name).
-- [] Show repos behind/ahead of remote, or with changes to be committed.
-- [] Write --help output.
-- [] Make a log-compliant output to run gogit as a cronjob.
+- [x] Clone absent repos.
+- [ ] Fetch/Pull/Push all repos.
+- [ ] Fetch/Pull/Push a single repo (by name).
+- [ ] Show repos behind/ahead of remote, or with changes to be committed.
+- [x] Write help output.
+- [ ] Make a log-compliant output to run gogit as a cronjob.
