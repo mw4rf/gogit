@@ -57,6 +57,8 @@ func main() {
 			simpleOutput = false
 		}
 		PrintReposList(repos, simpleOutput)
+	case "clone":
+		CloneRepos(repos)
 	default:
 		fmt.Println(ColorOutput(ColorRed, fmt.Sprintf("Error: Unknown command '%s'", os.Args[1])))
 		fmt.Println(fmt.Sprintf("Use '%s' to see the list of available commands.", ColorOutput(ColorGreen, "gogit help")))

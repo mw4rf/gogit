@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 )
@@ -298,4 +299,18 @@ func MakeRepoFromLocal(dir string) (*Repo, error) {
 	}
 
 	return repo, nil
+}
+
+// Clone the repository
+// The function runs the git clone command to clone the repository from the remote URL
+// into the local path
+func (r *Repo) Clone() error {
+	cmd := exec.Command("git", "clone", r.Remote, r.Local)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	if err != nil {
+		return fmt.Errorf("Error cloning repository: %s", err)
+	}
+	return nil
 }
