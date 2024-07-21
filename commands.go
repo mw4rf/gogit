@@ -24,7 +24,7 @@ func PrintHelp(command ...string) {
 		fmt.Printf("  %-*s %s\n", commandWidth, ColorOutput(ColorCyan, "list"), ColorOutput(ColorWhite, "List the repositories in a simple and compact format"))
 		fmt.Printf("  %-*s %s\n", commandWidth, ColorOutput(ColorCyan, "list full"), ColorOutput(ColorWhite, "List the repositories in a detailed format"))
 		fmt.Printf("  %-*s %s\n", commandWidth, ColorOutput(ColorCyan, "run <command> [repository]"), ColorOutput(ColorWhite, "Execute a git command on a repository or on all repositories if no repository is provided"))
-		fmt.Printf("  %-*s %s\n", commandWidth, ColorOutput(ColorCyan, "do <command> [repository]"), ColorOutput(ColorWhite, "Show the details of a predefined command on a repository or on all repositories if no repository is provided."))
+		fmt.Printf("  %-*s %s\n", commandWidth, ColorOutput(ColorCyan, "do <command> [repository]"), ColorOutput(ColorWhite, "Execute a predefined command on a repository or on all repositories if no repository is provided."))
 		fmt.Printf("  %-*s %s\n", commandWidth, "", ColorOutput(ColorWhite, "To show all available commands, use 'gogit do help'"))
 		fmt.Printf("  %-*s %s\n", commandWidth, ColorOutput(ColorCyan, "genrepos [root]"), ColorOutput(ColorWhite, "Generate and print a JSON string with the details of all git repositories in a given root folder"))
 		fmt.Printf("  %-*s %s\n", commandWidth, ColorOutput(ColorCyan, "clone"), ColorOutput(ColorWhite, "Check all repositories and clone the ones that are missing"))

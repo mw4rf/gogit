@@ -52,13 +52,13 @@ Commands:
   
   list full                       List the repositories in a detailed format
   
-  do <command> [repository]       Execute a git command on a repository or on all
+  run <command> [repository]      Execute a git command on a repository or on all
                                   repositories if no repository is provided
   
-  show <command> [repository]     Show the details of a predefined command on a
+  do <command> [repository]       Execute a predefined command on a
                                   repository or on all repositories if no repository
                                   is provided. To show all available commands, 
-                                  use 'gogit show help'
+                                  use 'gogit do help'
   
   genrepos [root]                 Generate and print a JSON string with the details of
                                   all git repositories in a given root folder
