@@ -23,9 +23,9 @@ func PrintHelp(command ...string) {
 
 		fmt.Printf("  %-*s %s\n", commandWidth, ColorOutput(ColorCyan, "list"), ColorOutput(ColorWhite, "List the repositories in a simple and compact format"))
 		fmt.Printf("  %-*s %s\n", commandWidth, ColorOutput(ColorCyan, "list full"), ColorOutput(ColorWhite, "List the repositories in a detailed format"))
-		fmt.Printf("  %-*s %s\n", commandWidth, ColorOutput(ColorCyan, "do <command> [repository]"), ColorOutput(ColorWhite, "Execute a git command on a repository or on all repositories if no repository is provided"))
-		fmt.Printf("  %-*s %s\n", commandWidth, ColorOutput(ColorCyan, "show <command> [repository]"), ColorOutput(ColorWhite, "Show the details of a predefined command on a repository or on all repositories if no repository is provided."))
-		fmt.Printf("  %-*s %s\n", commandWidth, "", ColorOutput(ColorWhite, "To show all available commands, use 'gogit show help'"))
+		fmt.Printf("  %-*s %s\n", commandWidth, ColorOutput(ColorCyan, "run <command> [repository]"), ColorOutput(ColorWhite, "Execute a git command on a repository or on all repositories if no repository is provided"))
+		fmt.Printf("  %-*s %s\n", commandWidth, ColorOutput(ColorCyan, "do <command> [repository]"), ColorOutput(ColorWhite, "Show the details of a predefined command on a repository or on all repositories if no repository is provided."))
+		fmt.Printf("  %-*s %s\n", commandWidth, "", ColorOutput(ColorWhite, "To show all available commands, use 'gogit do help'"))
 		fmt.Printf("  %-*s %s\n", commandWidth, ColorOutput(ColorCyan, "genrepos [root]"), ColorOutput(ColorWhite, "Generate and print a JSON string with the details of all git repositories in a given root folder"))
 		fmt.Printf("  %-*s %s\n", commandWidth, ColorOutput(ColorCyan, "clone"), ColorOutput(ColorWhite, "Check all repositories and clone the ones that are missing"))
 		fmt.Printf("  %-*s %s\n", commandWidth, ColorOutput(ColorCyan, "help [command]"), ColorOutput(ColorWhite, "Print this help message or detailed help for a specific command"))
@@ -36,15 +36,16 @@ func PrintHelp(command ...string) {
 		case "list":
 			fmt.Println(ColorOutput(ColorYellow, "Usage: gogit list [full]"))
 			fmt.Println(ColorOutput(ColorWhite, "List the repositories in a simple and compact format. Use 'full' to list in a detailed format."))
+		case "run":
+			fmt.Println(ColorOutput(ColorYellow, "Usage: gogit run <command> [repository]"))
+			fmt.Println(ColorOutput(ColorWhite, "Execute a git command on a repository or on all repositories if no repository is provided."))
 		case "do":
 			fmt.Println(ColorOutput(ColorYellow, "Usage: gogit do <command> [repository]"))
-			fmt.Println(ColorOutput(ColorWhite, "Execute a git command on a repository or on all repositories if no repository is provided."))
-		case "show":
-			fmt.Println(ColorOutput(ColorYellow, "Usage: gogit show <command> [repository]"))
 			fmt.Println(ColorOutput(ColorWhite, "Show the details of a predefined command on a repository or on all repositories if no repository is provided."))
 			fmt.Println(ColorOutput(ColorWhite, "Available predefined commands:"))
-			for cmd := range predefinedCommands {
-				fmt.Printf("  %s\n", ColorOutput(ColorGreen, cmd))
+			for cmd, args := range predefinedCommands {
+				// fmt.Printf("  %s\n", ColorOutput(ColorGreen, cmd))
+				fmt.Printf("  %s => %s\n", ColorOutput(ColorGreen, cmd), ColorOutput(ColorBlue, strings.Join(args, " ")))
 			}
 		case "genrepos":
 			fmt.Println(ColorOutput(ColorYellow, "Usage: gogit genrepos [root]"))
@@ -123,7 +124,7 @@ func CloneRepos(repos []Repo) {
 	os.Exit(0)
 }
 
-// Command: do
+// Command: run
 // Description: Execute a git command on all repositories
 // This function runs the git command in parallel for each repository with goroutines
 // Example: gogit do pull
@@ -188,14 +189,189 @@ func ExecGitCommand(repos []Repo, args []string, repoName string) {
     os.Exit(0)
 }
 
-// Command: show
+// Command: do
 // Description: Show the details of a git command
 // Example: gogit show status myrepo
 var predefinedCommands = map[string][]string{
-    "history": {"log", "--oneline", "--decorate", "--graph", "--all"},
-    // Add more predefined commands here
+    // History and status
+    "h":           {"log", "--oneline", "--decorate", "--graph", "--all"},
+    "hf":          {"log", "--oneline", "--decorate", "--graph", "--all", "--simplify-by-decoration"},
+    "ha":          {"log", "--author=<author>", "--oneline", "--decorate", "--graph"},
+    "hg":          {"log", "--grep=<pattern>", "--oneline", "--decorate", "--graph"},
+    "st":          {"status", "-s", "-b"},
+    "status":      {"status"},
+
+    // Tag and branch management
+    "t":           {"tag", "-l"},
+    "ta":          {"tag", "-a", "v1.0", "-m", "Version 1.0"},
+    "td":          {"tag", "-d", "v1.0"},
+    "b":           {"branch", "-a"},
+    "bc":          {"branch", "--show-current"},
+    "bn":          {"branch", "new-branch"},
+    "bd":          {"branch", "-d", "old-branch"},
+    "bf":          {"branch", "-D", "old-branch"},
+    "bm":          {"branch", "-m", "old-branch", "new-branch"},
+
+    // Remote management
+    "r":           {"remote", "-v"},
+    "ra":          {"remote", "add", "origin", "git@github.com:user/repo.git"},
+    "rr":          {"remote", "remove", "origin"},
+    "rs":          {"remote", "set-url", "origin", "git@github.com:new/repo.git"},
+    "rp":          {"remote", "prune", "origin"},
+
+    // Configuration
+    "cfg":         {"config", "--list"},
+    "cfge":        {"config", "--global", "--edit"},
+    "cfgu":        {"config", "--global", "user.name", "Your Name"},
+    "cfgm":        {"config", "--global", "user.email", "your.email@example.com"},
+    "cfga":        {"config", "--global", "alias.co", "checkout"},
+
+    // Diff commands
+    "diff":        {"diff"},
+    "diffs":       {"diff", "--stat"},
+    "diffc":       {"diff", "--cached"},
+    "diffn":       {"diff", "--name-only"},
+    "diffsum":     {"diff", "--summary"},
+    "diffcolor":   {"diff", "--color"},
+    "diffw":       {"diff", "--word-diff"},
+    "diffu":       {"diff", "-U10"},
+
+    // Pull commands
+    "pull":        {"pull"},
+    "pullrb":      {"pull", "--rebase"},
+    "pullff":      {"pull", "--ff-only"},
+    "pullsq":      {"pull", "--squash"},
+    "pullall":     {"pull", "--all"},
+
+    // Push commands
+    "push":        {"push"},
+    "pushf":       {"push", "--force"},
+    "pushfl":      {"push", "--force-with-lease"},
+    "pushup":      {"push", "--set-upstream", "origin", "branch"},
+    "pushtags":    {"push", "--tags"},
+    "pushdel":     {"push", "origin", "--delete", "branch"},
+
+    // Fetch commands
+    "fetch":       {"fetch"},
+    "fetchp":      {"fetch", "--prune"},
+    "fetchall":    {"fetch", "--all"},
+    "fetchtags":   {"fetch", "--tags"},
+
+    // Merge and rebase
+    "mg":          {"merge"},
+    "mgab":        {"merge", "--abort"},
+    "mgours":      {"merge", "--strategy=ours"},
+    "mgm":         {"merge", "-m", "Merging branch"},
+    "rb":          {"rebase"},
+    "rbcon":       {"rebase", "--continue"},
+    "rbab":        {"rebase", "--abort"},
+    "rbmg":        {"rebase", "--merge"},
+    "rbi":         {"rebase", "-i", "HEAD~5"},
+
+    // Checkout and commit
+    "ck":          {"checkout"},
+    "ckn":         {"checkout", "-b", "new-branch"},
+    "ckd":         {"checkout", "--detach"},
+    "ckf":         {"checkout", "HEAD", "file.txt"},
+    "cm":          {"commit"},
+    "cmam":        {"commit", "--amend"},
+    "cmm":         {"commit", "-m", "Your commit message"},
+    "cmv":         {"commit", "--verbose"},
+    "cma":         {"commit", "-a", "-m", "Commit all changes"},
+
+    // Add, reset, and remove
+    "add":         {"add"},
+    "adda":        {"add", "--all"},
+    "addi":        {"add", "-i"},
+    "addp":        {"add", "-p"},
+    "reset":       {"reset"},
+    "resets":      {"reset", "--soft", "HEAD~1"},
+    "reseth":      {"reset", "--hard", "HEAD~1"},
+    "resetm":      {"reset", "--mixed", "HEAD~1"},
+    "rm":          {"rm"},
+    "rmc":         {"rm", "--cached"},
+    "rmf":         {"rm", "-f"},
+
+    // Logging and blame
+    "log":         {"log"},
+    "logg":        {"log", "--graph"},
+    "logd":        {"log", "--decorate"},
+    "loga":        {"log", "--author=<author>"},
+    "loggrep":     {"log", "--grep=<pattern>"},
+    "blame":       {"blame"},
+    "blamei":      {"blame", "--incremental"},
+    "blametime":   {"blame", "--since=2.weeks"},
+    "blamel":      {"blame", "--line-porcelain"},
+
+    // Cleaning and garbage collection
+    "clean":       {"clean"},
+    "cleanf":      {"clean", "-f"},
+    "cleandx":     {"clean", "-d", "-x", "-f"},
+    "gc":          {"gc", "--aggressive", "--prune=now"},
+    "gcauto":      {"gc", "--auto"},
+
+    // Submodule commands
+    "subupd":      {"submodule", "update", "--init", "--recursive"},
+    "substatus":   {"submodule", "status"},
+    "subadd":      {"submodule", "add", "url", "path"},
+    "subsync":     {"submodule", "sync", "--recursive"},
+
+    // Other commands
+    "shortlog":    {"shortlog", "-sn"},
+    "ignore":      {"check-ignore", "*"},
+    "revlist":     {"rev-list", "--all"},
+    "reflog":      {"reflog"},
+    "countobj":    {"count-objects", "-v"},
+    "showbranch":  {"show-branch"},
+    "verifypack":  {"verify-pack", "-v", ".git/objects/pack/*.pack"},
+    "show":        {"show"},
+    "grep":        {"grep", "--line-number", "TODO"},
+    "archivelog":  {"archive", "--format=tar", "--output=log.tar", "HEAD"},
+    "bundlecreate": {"bundle", "create", "repo.bundle", "HEAD"},
+    "bundleverify": {"bundle", "verify", "repo.bundle"},
+    "bundleheads": {"bundle", "list-heads", "repo.bundle"},
+    "rangediff":   {"range-diff", "HEAD~5..HEAD", "origin/master"},
+    "sparse":      {"sparse-checkout", "init", "--cone"},
+    "worktreeadd": {"worktree", "add", "-b", "new-branch", "../path/to/new-worktree"},
+    "fsck":        {"fsck", "--full"},
+    "packrefs":    {"pack-refs", "--all"},
+    "prune":       {"prune"},
+    "bisectstart": {"bisect", "start"},
+    "bisectbad":   {"bisect", "bad"},
+    "bisectgood":  {"bisect", "good", "HEAD~10"},
+    "bisectreset": {"bisect", "reset"},
+    "repack":      {"repack", "-a", "-d", "--depth=250", "--window=250"},
+    "verifytag":   {"verify-tag", "-v"},
+    "verifycm":    {"verify-commit", "-v"},
+    "lstree":      {"ls-tree", "-r", "HEAD"},
+    "revparse":    {"rev-parse", "--verify", "HEAD"},
+    "cherry":      {"cherry", "-v"},
+    "cherrypick":  {"cherry-pick", "HEAD~3..HEAD"},
+    "notes":       {"notes", "list"},
+    "describetags": {"describe", "--tags", "--abbrev=0"},
+    "checkoutindex": {"checkout-index", "-a", "-f"},
+    "committree":  {"commit-tree", "HEAD^{tree}", "-m", "New commit"},
+    "mergebase":   {"merge-base", "HEAD", "master"},
+    "packobj":     {"pack-objects", "--all", ".git/objects/pack/pack"},
+    "revparsehead": {"rev-parse", "--short", "HEAD"},
+    "symbolicref": {"symbolic-ref", "HEAD"},
+    "updateindex": {"update-index", "--refresh"},
+    "updateref":   {"update-ref", "-d", "refs/heads/branch"},
+    "whatchanged": {"whatchanged", "-p", "--abbrev-commit", "--pretty=medium"},
+    "verifypackfiles": {"verify-pack", "-v", ".git/objects/pack/pack-*"},
+    "unpackobj":   {"unpack-objects", ".git/objects/pack/*.pack"},
+    "difftool":    {"difftool", "--dir-diff"},
+    "mergetool":   {"mergetool"},
+    "subtreesplit": {"subtree", "split", "--prefix=lib", "-b", "split-branch"},
+    "filterbranch": {"filter-branch", "--index-filter", "git rm -r --cached --ignore-unmatch <path>", "HEAD"},
+    "replace":     {"replace", "old-hash", "new-hash"},
+    "showref":     {"show-ref"},
+    "verifynotes": {"verify-notes", "-v"},
+    "commitgraph": {"commit-graph", "write", "--reachable", "--changed-paths"},
+    "worktreeprune": {"worktree", "prune"},
 }
-func ShowCommand(repos []Repo, args []string, repoName string) {
+
+func DoCommand(repos []Repo, args []string, repoName string) {
     if len(repos) == 0 {
         fmt.Println(ColorOutput(ColorYellow, "No repositories found"))
         os.Exit(0)

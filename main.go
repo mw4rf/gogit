@@ -64,10 +64,10 @@ func main() {
 			PrintReposList(repos, simpleOutput)
 
 		// gogit do <command> [args] [repo_name]
-		case "do":
+		case "run":
 			if len(os.Args) < 3 {
 				fmt.Println(ColorOutput(ColorRed, "Error: Missing command to execute"))
-				fmt.Println(ColorOutput(ColorYellow, "Usage: gogit do <command> [args] [repo_name]"))
+				fmt.Println(ColorOutput(ColorYellow, "Usage: gogit run <command> [args] [repo_name]"))
 				os.Exit(1)
 			}
 			args := os.Args[2:]
@@ -86,10 +86,10 @@ func main() {
 			ExecGitCommand(repos, args, repoName)
 
 		// gogit show <command> [repo_name]
-		case "show":
+		case "do":
 			if len(os.Args) < 3 {
 				fmt.Println(ColorOutput(ColorRed, "Error: Missing command to execute"))
-				fmt.Println(ColorOutput(ColorYellow, "Usage: gogit show <command> [repo_name]"))
+				fmt.Println(ColorOutput(ColorYellow, "Usage: gogit do <command> [repo_name]"))
 				os.Exit(1)
 			}
 			args := os.Args[2:]
@@ -105,7 +105,7 @@ func main() {
 					}
 				}
 			}
-			ShowCommand(repos, args, repoName)
+			DoCommand(repos, args, repoName)
 
 		// gogit clone
 		case "clone":
