@@ -23,6 +23,7 @@ func PrintHelp() {
 
 	fmt.Printf("  %-*s %s\n", commandWidth, ColorOutput(ColorCyan, "list"), "List the repositories in a simple and compact format")
 	fmt.Printf("  %-*s %s\n", commandWidth, ColorOutput(ColorCyan, "list full"), "List the repositories in a detailed format")
+	fmt.Printf("  %-*s %s\n", commandWidth, ColorOutput(ColorCyan, "do <command>"), "Execute a git command on all repositories")
 	fmt.Printf("  %-*s %s\n", commandWidth, ColorOutput(ColorCyan, "genrepos [root]"), "Generate and print a JSON string with the details of all git repositories in a given root folder")
 	fmt.Printf("  %-*s %s\n", commandWidth, ColorOutput(ColorCyan, "clone"), "Check all repositories and clone the ones that are missing")
 	fmt.Printf("  %-*s %s\n", commandWidth, ColorOutput(ColorCyan, "help"), "Print this help message")
