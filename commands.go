@@ -3,6 +3,10 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
+	"sync"
+	"os/exec"
+	"bytes"
 )
 
 // Command: help
@@ -83,4 +87,102 @@ func CloneRepos(repos []Repo) {
 		}
 	}
 	os.Exit(0)
+}
+
+// DEPRECATED: this is a naive implementation thar runs synchronously
+// Command: do
+// Description: Execute a git command on all repositories
+// Example: gogit do pull
+func ExecGitCommandSync(repos []Repo, args []string) {
+    if len(repos) == 0 {
+        fmt.Println(ColorOutput(ColorYellow, "No repositories found"))
+        os.Exit(0)
+    }
+    if len(args) == 0 {
+        fmt.Println(ColorOutput(ColorRed, "Error: Missing command to execute"))
+        fmt.Println(ColorOutput(ColorYellow, "Usage: gogit do <command> [args]"))
+        os.Exit(1)
+    }
+
+    argsStr := strings.Join(args, " ")
+
+    for _, repo := range repos {
+        fmt.Println(ColorOutput(ColorCyan, "======================================="))
+        fmt.Println(ColorOutput(ColorCyan, fmt.Sprintf("Executing '%s' in %s", argsStr, repo.Local)))
+        fmt.Println(ColorOutput(ColorCyan, "---------------------------------------"))
+
+        err := repo.RunGitCommand(args)
+        if err != nil {
+            fmt.Println(ColorOutput(ColorRed, fmt.Sprintf("Error executing command in %s: %s", repo.Name, err)))
+        } else {
+            fmt.Println(ColorOutput(ColorGreen, fmt.Sprintf("Successfully executed command in %s", repo.Name)))
+        }
+
+        fmt.Println(ColorOutput(ColorCyan, "=======================================\n"))
+    }
+    os.Exit(0)
+}
+
+// Command: do
+// Description: Execute a git command on all repositories
+// This function runs the git command in parallel for each repository with goroutines
+// Example: gogit do pull
+func ExecGitCommand(repos []Repo, args []string) {
+    if len(repos) == 0 {
+        fmt.Println(ColorOutput(ColorYellow, "No repositories found"))
+        os.Exit(0)
+    }
+    if len(args) == 0 {
+        fmt.Println(ColorOutput(ColorRed, "Error: Missing command to execute"))
+        fmt.Println(ColorOutput(ColorYellow, "Usage: gogit do <command> [args]"))
+        os.Exit(1)
+    }
+
+    var wg sync.WaitGroup
+    var mu sync.Mutex
+
+    argsStr := strings.Join(args, " ")
+
+    for _, repo := range repos {
+        wg.Add(1)
+        go func(repo Repo) {
+            defer wg.Done()
+
+            // Run the Git command and capture the output
+            cmd := exec.Command("git", args...)
+            cmd.Dir = repo.Local
+            var outBuf, errBuf bytes.Buffer
+            cmd.Stdout = &outBuf
+            cmd.Stderr = &errBuf
+
+            err := cmd.Run()
+            outStr := outBuf.String()
+            errStr := errBuf.String()
+
+            mu.Lock()
+            fmt.Println(ColorOutput(ColorCyan, "======================================="))
+            fmt.Println(ColorOutput(ColorCyan, fmt.Sprintf("Executing '%s' in %s", argsStr, repo.Local)))
+            fmt.Println(ColorOutput(ColorCyan, "---------------------------------------"))
+
+            // Print the command output without color
+            if outStr != "" {
+                fmt.Println(outStr)
+            }
+            if errStr != "" {
+                fmt.Println(errStr)
+            }
+
+            if err != nil {
+                fmt.Println(ColorOutput(ColorRed, fmt.Sprintf("Error executing command in %s: %s", repo.Name, err)))
+            } else {
+                fmt.Println(ColorOutput(ColorGreen, fmt.Sprintf("Successfully executed command in %s", repo.Name)))
+            }
+
+            fmt.Println(ColorOutput(ColorCyan, "=======================================\n"))
+            mu.Unlock()
+        }(repo)
+    }
+
+    wg.Wait()
+    os.Exit(0)
 }

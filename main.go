@@ -57,6 +57,13 @@ func main() {
 			simpleOutput = false
 		}
 		PrintReposList(repos, simpleOutput)
+	case "do":
+		if len(os.Args) < 3 {
+			fmt.Println(ColorOutput(ColorRed, "Error: Missing command to execute"))
+			fmt.Println(ColorOutput(ColorYellow, "Usage: gogit do <command> [args]"))
+			os.Exit(1)
+		}
+		ExecGitCommand(repos, os.Args[2:]) // takes all arguments after "do"
 	case "clone":
 		CloneRepos(repos)
 	default:

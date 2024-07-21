@@ -314,3 +314,16 @@ func (r *Repo) Clone() error {
 	}
 	return nil
 }
+
+// Execute a git command
+func (r *Repo) RunGitCommand(args []string) error {
+	cmd := exec.Command("git", args...)
+	cmd.Dir = r.Local
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	if err != nil {
+		return fmt.Errorf("Error executing git command: %s", err)
+	}
+	return nil
+}
