@@ -51,24 +51,43 @@ func main() {
 
 	// Handle commands that require the repositories
 	switch os.Args[1] {
-	case "list":
-		simpleOutput := true
-		if len(os.Args) > 2 && os.Args[2] == "full" {
-			simpleOutput = false
-		}
-		PrintReposList(repos, simpleOutput)
-	case "do":
-		if len(os.Args) < 3 {
-			fmt.Println(ColorOutput(ColorRed, "Error: Missing command to execute"))
-			fmt.Println(ColorOutput(ColorYellow, "Usage: gogit do <command> [args]"))
-			os.Exit(1)
-		}
-		ExecGitCommand(repos, os.Args[2:]) // takes all arguments after "do"
-	case "clone":
-		CloneRepos(repos)
-	default:
-		fmt.Println(ColorOutput(ColorRed, fmt.Sprintf("Error: Unknown command '%s'", os.Args[1])))
-		fmt.Println(fmt.Sprintf("Use '%s' to see the list of available commands.", ColorOutput(ColorGreen, "gogit help")))
+		// gogit list [full]
+		case "list":
+			simpleOutput := true
+			if len(os.Args) > 2 && os.Args[2] == "full" {
+				simpleOutput = false
+			}
+			PrintReposList(repos, simpleOutput)
+
+		// gogit do <command> [args] [repo_name]
+		case "do":
+			if len(os.Args) < 3 {
+				fmt.Println(ColorOutput(ColorRed, "Error: Missing command to execute"))
+				fmt.Println(ColorOutput(ColorYellow, "Usage: gogit do <command> [args] [repo_name]"))
+				os.Exit(1)
+			}
+			args := os.Args[2:]
+			var repoName string
+			if len(args) > 1 {
+				lastArg := args[len(args)-1]
+				// Check if the last argument is a repository name by seeing if it exists in the repo list
+				for _, repo := range repos {
+					if repo.Name == lastArg {
+						repoName = lastArg
+						args = args[:len(args)-1]
+						break
+					}
+				}
+			}
+			ExecGitCommand(repos, args, repoName)
+
+		// gogit clone
+		case "clone":
+			CloneRepos(repos)
+
+		default:
+			fmt.Println(ColorOutput(ColorRed, fmt.Sprintf("Error: Unknown command '%s'", os.Args[1])))
+			fmt.Println(fmt.Sprintf("Use '%s' to see the list of available commands.", ColorOutput(ColorGreen, "gogit help")))
 	}
 
 }
