@@ -48,11 +48,26 @@ gogit genrepos ~/git > ~/.config/gogit/repos.json
 ``` sh
 Usage: gogit <command> [arguments]
 Commands:
-  list                  List the repositories in a simple and compact format
-  list full             List the repositories in a detailed format
-  genrepos [root]       Generate and print a JSON string with the details of all git repositories in a given root folder
-  clone                 Check all repositories and clone the ones that are missing
-  help                  Print this help message
+  list                            List the repositories in a simple and compact format
+  
+  list full                       List the repositories in a detailed format
+  
+  do <command> [repository]       Execute a git command on a repository or on all
+                                  repositories if no repository is provided
+  
+  show <command> [repository]     Show the details of a predefined command on a
+                                  repository or on all repositories if no repository
+                                  is provided. To show all available commands, 
+                                  use 'gogit show help'
+  
+  genrepos [root]                 Generate and print a JSON string with the details of
+                                  all git repositories in a given root folder
+  
+  clone                           Check all repositories and clone the ones that are
+                                  missing
+  
+  help [command]                  Print this help message or detailed help for a 
+                                  specific command
 ```
 
 ## License
@@ -67,3 +82,6 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 - [ ] Show repos behind/ahead of remote, or with changes to be committed.
 - [x] Write help output.
 - [ ] Make a log-compliant output to run gogit as a cronjob.
+- [x] Run a git command on a repo / all repos
+- [x] Show detailed informations about a repo / all repos
+- [x] Detailed help for commands (help [command])
