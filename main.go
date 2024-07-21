@@ -21,7 +21,11 @@ func main() {
 
 	// Command: help
 	if os.Args[1] == "help" {
-		PrintHelp()
+		if len(os.Args) > 2 {
+			PrintHelp(os.Args[2])
+		} else {
+			PrintHelp()
+		}
 		os.Exit(0)
 	}
 

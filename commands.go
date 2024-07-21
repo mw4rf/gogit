@@ -12,19 +12,54 @@ import (
 // Print the help message
 // PrintHelp prints the usage and commands with aligned columns and colors
 // PrintHelp prints the usage and commands with aligned columns and colors
-func PrintHelp() {
-	fmt.Println(ColorOutput(ColorYellow, "Usage: gogit <command> [arguments]"))
-	fmt.Println(ColorOutput(ColorYellow, "Commands:"))
+func PrintHelp(command ...string) {
+	if len(command) == 0 {
+		// General help
+		fmt.Println(ColorOutput(ColorYellow, "Usage: gogit <command> [arguments]"))
+		fmt.Println(ColorOutput(ColorYellow, "Commands:"))
 
-	// Define the widths for each field
-	commandWidth := 30
+		// Define the widths for each field
+		commandWidth := 40
 
-	fmt.Printf("  %-*s %s\n", commandWidth, ColorOutput(ColorCyan, "list"), "List the repositories in a simple and compact format")
-	fmt.Printf("  %-*s %s\n", commandWidth, ColorOutput(ColorCyan, "list full"), "List the repositories in a detailed format")
-	fmt.Printf("  %-*s %s\n", commandWidth, ColorOutput(ColorCyan, "do <command> [repository]"), "Execute a git command on a repository or on all repositories if no repository is provided")
-	fmt.Printf("  %-*s %s\n", commandWidth, ColorOutput(ColorCyan, "genrepos [root]"), "Generate and print a JSON string with the details of all git repositories in a given root folder")
-	fmt.Printf("  %-*s %s\n", commandWidth, ColorOutput(ColorCyan, "clone"), "Check all repositories and clone the ones that are missing")
-	fmt.Printf("  %-*s %s\n", commandWidth, ColorOutput(ColorCyan, "help"), "Print this help message")
+		fmt.Printf("  %-*s %s\n", commandWidth, ColorOutput(ColorCyan, "list"), ColorOutput(ColorWhite, "List the repositories in a simple and compact format"))
+		fmt.Printf("  %-*s %s\n", commandWidth, ColorOutput(ColorCyan, "list full"), ColorOutput(ColorWhite, "List the repositories in a detailed format"))
+		fmt.Printf("  %-*s %s\n", commandWidth, ColorOutput(ColorCyan, "do <command> [repository]"), ColorOutput(ColorWhite, "Execute a git command on a repository or on all repositories if no repository is provided"))
+		fmt.Printf("  %-*s %s\n", commandWidth, ColorOutput(ColorCyan, "show <command> [repository]"), ColorOutput(ColorWhite, "Show the details of a predefined command on a repository or on all repositories if no repository is provided."))
+		fmt.Printf("  %-*s %s\n", commandWidth, "", ColorOutput(ColorWhite, "To show all available commands, use 'gogit show help'"))
+		fmt.Printf("  %-*s %s\n", commandWidth, ColorOutput(ColorCyan, "genrepos [root]"), ColorOutput(ColorWhite, "Generate and print a JSON string with the details of all git repositories in a given root folder"))
+		fmt.Printf("  %-*s %s\n", commandWidth, ColorOutput(ColorCyan, "clone"), ColorOutput(ColorWhite, "Check all repositories and clone the ones that are missing"))
+		fmt.Printf("  %-*s %s\n", commandWidth, ColorOutput(ColorCyan, "help [command]"), ColorOutput(ColorWhite, "Print this help message or detailed help for a specific command"))
+	} else {
+		// Detailed help for a specific command
+		cmd := command[0]
+		switch cmd {
+		case "list":
+			fmt.Println(ColorOutput(ColorYellow, "Usage: gogit list [full]"))
+			fmt.Println(ColorOutput(ColorWhite, "List the repositories in a simple and compact format. Use 'full' to list in a detailed format."))
+		case "do":
+			fmt.Println(ColorOutput(ColorYellow, "Usage: gogit do <command> [repository]"))
+			fmt.Println(ColorOutput(ColorWhite, "Execute a git command on a repository or on all repositories if no repository is provided."))
+		case "show":
+			fmt.Println(ColorOutput(ColorYellow, "Usage: gogit show <command> [repository]"))
+			fmt.Println(ColorOutput(ColorWhite, "Show the details of a predefined command on a repository or on all repositories if no repository is provided."))
+			fmt.Println(ColorOutput(ColorWhite, "Available predefined commands:"))
+			for cmd := range predefinedCommands {
+				fmt.Printf("  %s\n", ColorOutput(ColorGreen, cmd))
+			}
+		case "genrepos":
+			fmt.Println(ColorOutput(ColorYellow, "Usage: gogit genrepos [root]"))
+			fmt.Println(ColorOutput(ColorWhite, "Generate and print a JSON string with the details of all git repositories in a given root folder."))
+		case "clone":
+			fmt.Println(ColorOutput(ColorYellow, "Usage: gogit clone"))
+			fmt.Println(ColorOutput(ColorWhite, "Check all repositories and clone the ones that are missing."))
+		case "help":
+			fmt.Println(ColorOutput(ColorYellow, "Usage: gogit help [command]"))
+			fmt.Println(ColorOutput(ColorWhite, "Print this help message or detailed help for a specific command."))
+		default:
+			fmt.Println(ColorOutput(ColorRed, fmt.Sprintf("Error: Unknown command '%s'", cmd)))
+			fmt.Println(ColorOutput(ColorWhite, "Use 'gogit help' to see the list of available commands."))
+		}
+	}
 }
 
 // Command: genrepos
