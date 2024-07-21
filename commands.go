@@ -152,3 +152,74 @@ func ExecGitCommand(repos []Repo, args []string, repoName string) {
     wg.Wait()
     os.Exit(0)
 }
+
+// Command: show
+// Description: Show the details of a git command
+// Example: gogit show status myrepo
+var predefinedCommands = map[string][]string{
+    "history": {"log", "--oneline", "--decorate", "--graph", "--all"},
+    // Add more predefined commands here
+}
+func ShowCommand(repos []Repo, args []string, repoName string) {
+    if len(repos) == 0 {
+        fmt.Println(ColorOutput(ColorYellow, "No repositories found"))
+        os.Exit(0)
+    }
+    if len(args) == 0 {
+        fmt.Println(ColorOutput(ColorRed, "Error: Missing command to execute"))
+        fmt.Println(ColorOutput(ColorYellow, "Usage: gogit show <command> [repo_name]"))
+        os.Exit(1)
+    }
+
+    // Get the predefined command
+    cmdArgs, exists := predefinedCommands[args[0]]
+    if !exists {
+        fmt.Println(ColorOutput(ColorRed, fmt.Sprintf("Error: Unknown command '%s'", args[0])))
+        os.Exit(1)
+    }
+
+    // Filter repositories if a specific repository name is provided
+    filteredRepos := repos
+    if repoName != "" {
+        filteredRepos = []Repo{}
+        for _, repo := range repos {
+            if repo.Name == repoName {
+                filteredRepos = append(filteredRepos, repo)
+                break
+            }
+        }
+        if len(filteredRepos) == 0 {
+            fmt.Println(ColorOutput(ColorRed, fmt.Sprintf("Error: Repository '%s' not found", repoName)))
+            os.Exit(1)
+        }
+    }
+
+    var wg sync.WaitGroup
+    var mu sync.Mutex
+
+    for _, repo := range filteredRepos {
+        wg.Add(1)
+        go func(repo Repo) {
+            defer wg.Done()
+
+            mu.Lock()
+            fmt.Println(ColorOutput(ColorCyan, "======================================="))
+            fmt.Println(ColorOutput(ColorCyan, fmt.Sprintf("Details for %s", repo.Name)))
+            fmt.Println(ColorOutput(ColorCyan, "---------------------------------------"))
+            mu.Unlock()
+
+            // Run the Git command
+            err := repo.RunGitCommand(cmdArgs)
+
+            mu.Lock()
+            if err != nil {
+                fmt.Println(ColorOutput(ColorRed, fmt.Sprintf("Error executing command in %s: %s", repo.Name, err)))
+            }
+            fmt.Println(ColorOutput(ColorCyan, "=======================================\n"))
+            mu.Unlock()
+        }(repo)
+    }
+
+    wg.Wait()
+    os.Exit(0)
+}

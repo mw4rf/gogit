@@ -81,6 +81,28 @@ func main() {
 			}
 			ExecGitCommand(repos, args, repoName)
 
+		// gogit show <command> [repo_name]
+		case "show":
+			if len(os.Args) < 3 {
+				fmt.Println(ColorOutput(ColorRed, "Error: Missing command to execute"))
+				fmt.Println(ColorOutput(ColorYellow, "Usage: gogit show <command> [repo_name]"))
+				os.Exit(1)
+			}
+			args := os.Args[2:]
+			var repoName string
+			if len(args) > 1 {
+				lastArg := args[len(args)-1]
+				// Check if the last argument is a repository name by seeing if it exists in the repo list
+				for _, repo := range repos {
+					if repo.Name == lastArg {
+						repoName = lastArg
+						args = args[:len(args)-1]
+						break
+					}
+				}
+			}
+			ShowCommand(repos, args, repoName)
+
 		// gogit clone
 		case "clone":
 			CloneRepos(repos)
