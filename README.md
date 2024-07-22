@@ -58,7 +58,7 @@ Commands:
   do <command> [repository]       Execute a predefined command on a
                                   repository or on all repositories if no repository
                                   is provided. To show all available commands, 
-                                  use 'gogit do help'
+                                  use 'gogit help do'
   
   genrepos [root]                 Generate and print a JSON string with the details of
                                   all git repositories in a given root folder
