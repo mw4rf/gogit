@@ -6,7 +6,7 @@ name: Go
 on:
   push:
     branches: [ "master" ]
-    tags: [ "v*.*.*" ]  # Add this to trigger on version tags
+    tags: [ "v*.*" ]  # Adjusted to match tags like v0.1, v0.2
   pull_request:
     branches: [ "master" ]
 
@@ -34,8 +34,12 @@ jobs:
     - name: Test
       run: go test
 
+    - name: Check Tag
+      id: check_tag
+      run: echo "GITHUB_REF=${GITHUB_REF}"
+
     - name: Create Release
-      if: startsWith(github.ref, 'refs/tags/')  # Only run for tags
+      if: startsWith(github.ref, 'refs/tags/v')  # Only run for tags
       id: create_release
       uses: actions/create-release@v1
       env:
@@ -47,7 +51,7 @@ jobs:
         prerelease: false
 
     - name: Upload Linux Executable
-      if: startsWith(github.ref, 'refs/tags/')  # Only run for tags
+      if: startsWith(github.ref, 'refs/tags/v')  # Only run for tags
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -58,7 +62,7 @@ jobs:
         asset_content_type: application/octet-stream
 
     - name: Upload Windows Executable
-      if: startsWith(github.ref, 'refs/tags/')  # Only run for tags
+      if: startsWith(github.ref, 'refs/tags/v')  # Only run for tags
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -69,7 +73,7 @@ jobs:
         asset_content_type: application/octet-stream
 
     - name: Upload Mac Executable
-      if: startsWith(github.ref, 'refs/tags/')  # Only run for tags
+      if: startsWith(github.ref, 'refs/tags/v')  # Only run for tags
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
