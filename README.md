@@ -70,6 +70,20 @@ Commands:
                                   specific command
 ```
 
+## Custom commands
+
+The `gogit do <command> [repository]` command accepts, as argument, a predefined list ot harcoded commands. To show them, use `gogit help do`.
+
+You can add custom commands, in a `~/.config/gogit/commands.json` file. Here's an example :
+
+``` json
+{
+  "cma": ["commit", "-a", "-m", "Custom commit all changes"],
+  "diffc": ["diff", "--cached", "--color"],
+  "log": ["log", "--oneline", "--graph", "--decorate", "--color"]
+}
+```
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
