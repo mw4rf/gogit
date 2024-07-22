@@ -87,15 +87,3 @@ You can add custom commands, in a `~/.config/gogit/commands.json` file. Here's a
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
-## Todo
-
-- [x] Clone absent repos.
-- [ ] Fetch/Pull/Push all repos.
-- [ ] Fetch/Pull/Push a single repo (by name).
-- [ ] Show repos behind/ahead of remote, or with changes to be committed.
-- [x] Write help output.
-- [ ] Make a log-compliant output to run gogit as a cronjob.
-- [x] Run a git command on a repo / all repos
-- [x] Show detailed informations about a repo / all repos
-- [x] Detailed help for commands (help [command])
