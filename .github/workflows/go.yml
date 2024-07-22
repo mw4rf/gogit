@@ -35,9 +35,14 @@ jobs:
     - name: Test
       run: go test
 
-    - name: Check Tag
-      id: check_tag
-      run: echo "GITHUB_REF=${GITHUB_REF}"
+    - name: Determine Tag
+      id: determine_tag
+      run: |
+        if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+          echo "::set-output name=TAG_NAME::${{ github.ref#refs/tags/ }}"
+        else
+          echo "::set-output name=TAG_NAME::manual-$(date +'%Y%m%d%H%M%S')"
+        fi
 
     - name: Create Release
       if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/v')
@@ -46,8 +51,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
       with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
+        tag_name: ${{ steps.determine_tag.outputs.TAG_NAME }}
+        release_name: Release ${{ steps.determine_tag.outputs.TAG_NAME }}
         draft: false
         prerelease: false
 
