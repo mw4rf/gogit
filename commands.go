@@ -5,6 +5,8 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"path/filepath"
+	"encoding/json"
 )
 
 // Command: help
@@ -43,7 +45,12 @@ func PrintHelp(command ...string) {
 			fmt.Println(ColorOutput(ColorYellow, "Usage: gogit do <command> [repository]"))
 			fmt.Println(ColorOutput(ColorWhite, "Show the details of a predefined command on a repository or on all repositories if no repository is provided."))
 			fmt.Println(ColorOutput(ColorWhite, "Available predefined commands:"))
-			for cmd, args := range predefinedCommands {
+			commands, err := LoadUserCommands()
+			if err != nil {
+				fmt.Println(ColorOutput(ColorRed, fmt.Sprintf("Error loading custom commands: %s", err)))
+				commands = predefinedCommands
+			}
+			for cmd, args := range commands {
 				// fmt.Printf("  %s\n", ColorOutput(ColorGreen, cmd))
 				fmt.Printf("  %s => %s\n", ColorOutput(ColorGreen, cmd), ColorOutput(ColorBlue, strings.Join(args, " ")))
 			}
@@ -371,6 +378,38 @@ var predefinedCommands = map[string][]string{
     "worktreeprune": {"worktree", "prune"},
 }
 
+func LoadUserCommands() (map[string][]string, error) {
+    customCommands := make(map[string][]string)
+
+
+	commandsFile := filepath.Join(GetUserConfigDir(), "commands.json")
+    file, err := os.ReadFile(commandsFile)
+    if err != nil && !os.IsNotExist(err) {
+        return nil, err
+    }
+
+    if len(file) > 0 {
+        err = json.Unmarshal(file, &customCommands)
+        if err != nil {
+            return nil, err
+        }
+    }
+
+    merged := make(map[string][]string)
+
+    // Copy predefined commands to merged
+    for key, value := range predefinedCommands {
+        merged[key] = value
+    }
+
+    // Override or add custom commands
+    for key, value := range customCommands {
+        merged[key] = value
+    }
+
+    return merged, nil
+}
+
 func DoCommand(repos []Repo, args []string, repoName string) {
     if len(repos) == 0 {
         fmt.Println(ColorOutput(ColorYellow, "No repositories found"))
@@ -382,8 +421,15 @@ func DoCommand(repos []Repo, args []string, repoName string) {
         os.Exit(1)
     }
 
-    // Get the predefined command
-    cmdArgs, exists := predefinedCommands[args[0]]
+    // Load and merge custom commands with predefined commands
+    commands, err := LoadUserCommands()
+    if err != nil {
+        fmt.Println(ColorOutput(ColorRed, fmt.Sprintf("Error loading custom commands, falling back to predefined commands: %s", err)))
+		commands = predefinedCommands
+    }
+
+    // Get the command arguments
+    cmdArgs, exists := commands[args[0]]
     if !exists {
         fmt.Println(ColorOutput(ColorRed, fmt.Sprintf("Error: Unknown command '%s'", args[0])))
         os.Exit(1)
