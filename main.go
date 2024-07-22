@@ -6,14 +6,14 @@ import (
 	"path/filepath"
 )
 
-
+const VERSION = "0.1"
 
 func main() {
 	// Action that must be executed before loading the repositories
 
 	// No argument
 	if len(os.Args) < 2 {
-		fmt.Println(ColorOutput(ColorYellow, "gogit - A simple git repository manager"))
+		fmt.Println(ColorOutput(ColorYellow, fmt.Sprintf("gogit v%s - A simple git repository manager", VERSION)))
 		fmt.Println("Usage: gogit <command> [args]")
 		fmt.Println(fmt.Sprintf("Use '%s' to see the list of available commands.", ColorOutput(ColorGreen, "gogit help")))
 		os.Exit(0)
