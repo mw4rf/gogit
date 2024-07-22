@@ -22,8 +22,14 @@ jobs:
       with:
         go-version: '1.20'
 
-    - name: Build
-      run: go build -o gogit
+    - name: Build for Linux
+      run: GOOS=linux GOARCH=amd64 go build -o gogit-linux
+
+    - name: Build for Windows
+      run: GOOS=windows GOARCH=amd64 go build -o gogit-windows.exe
+
+    - name: Build for Mac
+      run: GOOS=darwin GOARCH=amd64 go build -o gogit-mac
 
     - name: Test
       run: go test
@@ -40,13 +46,35 @@ jobs:
         draft: false
         prerelease: false
 
-    - name: Upload Release Asset
+    - name: Upload Linux Executable
       if: startsWith(github.ref, 'refs/tags/')  # Only run for tags
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./gogit
-        asset_name: gogit
+        asset_path: ./gogit-linux
+        asset_name: gogit-linux
+        asset_content_type: application/octet-stream
+
+    - name: Upload Windows Executable
+      if: startsWith(github.ref, 'refs/tags/')  # Only run for tags
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./gogit-windows.exe
+        asset_name: gogit-windows.exe
+        asset_content_type: application/octet-stream
+
+    - name: Upload Mac Executable
+      if: startsWith(github.ref, 'refs/tags/')  # Only run for tags
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./gogit-mac
+        asset_name: gogit-mac
         asset_content_type: application/octet-stream
