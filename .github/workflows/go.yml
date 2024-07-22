@@ -1,14 +1,12 @@
-# This workflow will build a golang project and create a release
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
-
 name: Go
 
 on:
   push:
     branches: [ "master" ]
-    tags: [ "v*.*" ]  # Adjusted to match tags like v0.1, v0.2
+    tags: [ "v*" ]  # Adjusted to match tags like v0.1, v1.0, etc.
   pull_request:
     branches: [ "master" ]
+  workflow_dispatch:  # Manual trigger
 
 jobs:
   build:
